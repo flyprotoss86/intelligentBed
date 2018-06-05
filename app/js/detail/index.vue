@@ -27,7 +27,7 @@ import echarts from "echarts"
 require("echarts/lib/component/legend")
 import $ from "jquery"
 const url3Test = "http://www.qlyovo.com/zncd/getHealthReport.aspx?materialId="
-const url3 = "http://10.3.102.21:8080/SleepCareIIServer/getHealthReport.action?materialId="  // 18686000003218&date=2018-05-30
+const url3 = "http://192.168.8.109:8080/SleepCareIIServer/getHealthReport.action?materialId="  // 18686000003218&date=2018-05-30
 export default {
     mounted() {
         console.log(this.$route.params.materialId)
@@ -61,13 +61,14 @@ export default {
                     }
 
                     this.drawLine("myChartHeart", data.heartBeatDetailListVoBean.details[0].timeList, data.heartBeatDetailListVoBean.details[0].heartBeatList,
-                        "心率频率轨迹图", "时间", "心率(次/分钟)")
+                        "心率频率轨迹图", "时间", "心率(次/分钟)", '#fcaea4')
                     this.drawLine("myChartResp", data.respRateListVoBean.respRateVoBeanList[0].timeList, data.respRateListVoBean.respRateVoBeanList[0].respRateList,
-                        "呼吸频率轨迹图", "时间", "呼吸(次/分钟)")
+                        "呼吸频率轨迹图", "时间", "呼吸(次/分钟)", '#a2da81')
 
-                    this.drawTidong2("myChartTidong", data.bodyMotionListVoBean.details[0])
+                    this.drawSleep2("myChartSleep2", data.userSleepRangeListVoBean.sleepRanges, '#ca1317', '#8a8a8a')
                     this.drawSleep("myChartSleep1", data.userSleepRangeListVoBean.sleepRanges)
-                    this.drawSleep2("myChartSleep2", data.userSleepRangeListVoBean.sleepRanges)
+                    this.drawTidong2("myChartTidong", data.bodyMotionListVoBean.details[0], '#5badd5')
+
 
                     document.getElementById('myChartSleep1sub').style.display = ''
                 }
@@ -75,7 +76,7 @@ export default {
     },
 
     methods: {
-        drawTidong2(id, sleepData) {
+        drawTidong2(id, sleepData, color) {
             const myChart = echarts.init(document.getElementById(id))
             myChart.setOption({
                 title: {
@@ -93,7 +94,11 @@ export default {
                 },
                 series: [{
                     type: "line",
+                    symbol: "none",
                     data: sleepData.bodyMotionList,
+                    lineStyle:{
+                        color
+                    }
                 }],
             })
         },
@@ -373,8 +378,10 @@ export default {
             })
         },
 
-        drawSleep2(id, sleepData) {
+        drawSleep2(id, sleepData, mainColor, sideColor) {
             const myChart = echarts.init(document.getElementById(id))
+            const dataSrial1=[]
+            const dataSrial2=[]
             const dataX = []
             const dataY = []
             const types = [
@@ -389,13 +396,18 @@ export default {
             ]
 
             for (let i = 0; i < sleepData.length; i++) {
-                if (sleepData[i].sleepStatus < 1 || sleepData[i].sleepStatus > 6) {
-                    continue
-                }
-                dataX.push(sleepData[i].startTime)
-                dataY.push(sleepData[i].sleepStatus)
-                dataX.push(sleepData[i].endTime)
-                dataY.push(sleepData[i].sleepStatus)
+                dataSrial1.push([getMins(sleepData[i].startTime), sleepData[i].sleepStatus])
+                dataSrial1.push([getMins(sleepData[i].endTime), sleepData[i].sleepStatus])
+                dataSrial1.push([NaN, NaN])
+            }
+            for (let i = 0; i < sleepData.length; i++) {
+                dataSrial2.push([getMins(sleepData[i].startTime), sleepData[i].sleepStatus])
+                dataSrial2.push([NaN, NaN])
+                dataSrial2.push([getMins(sleepData[i].endTime), sleepData[i].sleepStatus])
+            }
+
+            function getMins(timeStr) {
+                return (((Number(timeStr.split(":")[0]) - 12) + 24) % 24) * 60 + Number(timeStr.split(":")[1])
             }
 
             myChart.setOption({
@@ -410,24 +422,47 @@ export default {
                 },
                 xAxis: {
                     name: "时间",
-                    data: dataX,
+                    scale: true,
+                    axisLabel: {
+                        formatter(val) {
+                            const hour = (12 + parseInt(val / 60)) % 24
+                            const min = (val % 60)
+                            return `${hour < 10 ? `0${hour}` : hour}:${min < 10 ? `0${min}` : min}`
+                        },
+                    },
                 },
                 yAxis: {
                     name: "",
                     axisLabel: {
                         formatter(val) {
-                            return types.filter(i => i.sleepStatus === val)[0].desc
+                            if(val !== 0)
+                              return types.filter(i => i.sleepStatus === val)[0].desc
                         },
                     },
                 },
                 series: [{
-                    type: "line",
-                    data: dataY,
+                    data: dataSrial1,
+                    type: 'line',
+                    symbol: 'none',
+                    lineStyle: {
+                        width: 4,
+                        color: mainColor
+                    }
+                },{
+                    data: dataSrial2,
+                    type: 'line',
+                    symbol: 'none',
+                    smooth: true,
+                    lineStyle: {
+                        width: 1,
+                        color: sideColor
+                    }
+
                 }],
             })
         },
 
-        drawLine(id, xData, yData, title, xName, yName) {
+        drawLine(id, xData, yData, title, xName, yName, color) {
             const myChart = echarts.init(document.getElementById(id))
             myChart.setOption({
                 title: {
@@ -446,7 +481,11 @@ export default {
                 },
                 series: [{
                     type: "line",
+                    symbol: "none",
                     data: yData,
+                    lineStyle: {
+                        color
+                    }
                 }],
             })
         },

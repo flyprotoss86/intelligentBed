@@ -17,9 +17,9 @@ const items = [{ currentStatus: "0", materialId: "18686000003218", messageCnt: 0
     { currentStatus: "0", materialId: "18627000001422", messageCnt: 0, department: "骨科", ward: "301", bedNum: "3" },
     { currentStatus: "0", materialId: "18615000001010", messageCnt: 0, department: "骨科", ward: "304", bedNum: "3" }]
 const url1 = "http://www.qlyovo.com/zncd/getMultiCurrentStatus.aspx?materialIds="
-// const url1 = "http://10.3.102.21:8080/SleepCareIIServer/getMultiCurrentStatus.action?materialIds="
+// const url1 = "http://192.168.8.109:8080/SleepCareIIServer/getMultiCurrentStatus.action?materialIds="
 const url2 = "http://www.qlyovo.com/zncd/getCurrentSleepStatusNew.aspx?materialId="
-// const url2 = "http://10.3.102.21:8080/SleepCareIIServer/getCurrentSleepStatusNew.action?materialId="
+// const url2 = "http://192.168.8.109:8080/SleepCareIIServer/getCurrentSleepStatusNew.action?materialId="
 export default {
     components: {
         material,

@@ -1,6 +1,7 @@
 import Vue from "vue"
 import App from "./App.vue"
 import router from "./router"
+import "babel-polyfill"
 
 // //引入echarts
 // import echarts from 'echarts'
